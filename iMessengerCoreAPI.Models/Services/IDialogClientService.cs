@@ -4,6 +4,7 @@ namespace iMessengerCoreAPI.Models.Services
 {
     public interface IDialogClientService
     {
-        public Guid GetDialogs(List<Guid> IDClients, RGDialogDbContext db);
+        public Guid GetDialogsFromDB(List<Guid> IDClients, RGDialogDbContext db);
+        public Guid GetDialogsFromCollection(List<Guid> IDClients, RGDialogClientCollection dialogClients);
     }
 }

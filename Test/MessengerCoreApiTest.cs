@@ -25,37 +25,56 @@ namespace Test
             Guid.NewGuid()
         };
         private readonly Guid _correctDialog = new Guid("fcd6b112-1834-4420-bee6-70c9776f6378");
-        
+
         private DialogClientService _service = new DialogClientService();
         private readonly DbContextOptionsBuilder<RGDialogDbContext> _options = new DbContextOptionsBuilder<RGDialogDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase");
+        private RGDialogClientCollection _rGDialogClientCollection = new();
 
         [SetUp]
         public void Setup()
-        {       
+        {
+            _rGDialogClientCollection.RGDialogsClients = RGDialogsClients.Init();
             using (var context = new TestDbContext(_options.Options))
             {
-                context.AddRange(RGDialogsClients.Init());
+                context.AddRange(_rGDialogClientCollection.RGDialogsClients);
                 context.SaveChanges();
-            }   
+            }
+           
         }
 
         [Test]
-        public void CheckDialogIsExists()
+        public void CheckDialogIsExistsInDB()
         {
             using (var context = new TestDbContext(_options.Options))
             {
-                Assert.AreEqual(_correctDialog, _service.GetDialogs(_correctClients, context));
+                Assert.AreEqual(_correctDialog, _service.GetDialogsFromDB(_correctClients, context));
             }
         }
 
         [Test]
-        public void CheckDialogIsNotExists()
+        public void CheckDialogIsNotExistsIbDB()
         {
             using (var context = new TestDbContext(_options.Options))
             {
-                Assert.AreEqual(Guid.Empty, _service.GetDialogs(_unCorrectClients, context));
+                Assert.AreEqual(Guid.Empty, _service.GetDialogsFromDB(_unCorrectClients, context));
             }
+        }
+
+
+        [Test]
+        public void CheckDialogIsExistsInColelction()
+        {
+
+            Assert.AreEqual(_correctDialog, _service.GetDialogsFromCollection(_correctClients, _rGDialogClientCollection));
+
+        }
+
+        [Test]
+        public void CheckDialogIsNotExistsInCollection()
+        {
+
+            Assert.AreEqual(Guid.Empty, _service.GetDialogsFromCollection(_unCorrectClients, _rGDialogClientCollection));
         }
 
         [TearDown]
@@ -63,9 +82,10 @@ namespace Test
         {
             using (var context = new TestDbContext(_options.Options))
             {
-                context.RemoveRange(RGDialogsClients.Init());
+                context.RemoveRange(_rGDialogClientCollection.RGDialogsClients);
+                context.SaveChanges();
             }
-
+            _rGDialogClientCollection.RGDialogsClients = new();
         }
     }
 }

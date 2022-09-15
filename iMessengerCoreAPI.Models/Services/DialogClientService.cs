@@ -6,9 +6,9 @@ namespace iMessengerCoreAPI.Models.Services
     public class DialogClientService: IDialogClientService
     {
 
-        public Guid GetDialogs(List<Guid> IDClients, RGDialogDbContext db)
+        public Guid GetDialogsFromDB(List<Guid> IDClients, RGDialogDbContext db)
         {
-            var res = db.RGDialogsClients.Select(
+            return db.RGDialogsClients.Select(
                      _ => new
                      {
                          dialog = _.IDRGDialog,
@@ -20,8 +20,24 @@ namespace iMessengerCoreAPI.Models.Services
                      .Where(_ => _.clientsCount == IDClients.Count && IDClients.Count > 0)
                      .Select(_ => _.dialog)
                      .FirstOrDefault();
-            return res;
           
+          
+        }
+
+        public Guid GetDialogsFromCollection(List<Guid> IDClients, RGDialogClientCollection dialogClients)
+        {
+            return dialogClients.RGDialogsClients.Select(
+                    _ => new
+                    {
+                        dialog = _.IDRGDialog,
+                        clientsCount = dialogClients.RGDialogsClients
+                        .Where(d => d.IDRGDialog == _.IDRGDialog && IDClients.Contains(d.IDClient))
+                        .Select(_ => _.IDClient).Count()
+                    })
+                    .ToHashSet()
+                    .Where(_ => _.clientsCount == IDClients.Count && IDClients.Count > 0)
+                    .Select(_ => _.dialog)
+                    .FirstOrDefault();
         }
     }
 }

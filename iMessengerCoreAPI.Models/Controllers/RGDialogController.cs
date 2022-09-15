@@ -16,13 +16,21 @@ namespace iMessengerCoreAPI.Models.Controllers
             _service = service;
             _db = db;
         }
-        [HttpGet("/api/dialogs")]
+        [HttpGet("/api/dialogsDb")]
         [ProducesResponseType(typeof(Guid), 200)]
-        public IActionResult GetDialog(List<Guid> IDClients)
+        public IActionResult GetFromDB(List<Guid> IDClients)
         {
-           // _db.AddRange(RGDialogsClients.Init());
-           // _db.SaveChanges();
-            return Ok(_service.GetDialogs(IDClients, _db));
+            RGDialogClientCollection rGDialogClientCollection = new();
+            rGDialogClientCollection.RGDialogsClients = RGDialogsClients.Init();
+            return Ok(_service.GetDialogsFromDB(IDClients, _db));
+        }
+        [HttpGet("/api/dialogsCollection")]
+        [ProducesResponseType(typeof(Guid), 200)]
+        public IActionResult GetFromCollection(List<Guid> IDClients)
+        {
+            RGDialogClientCollection rGDialogClientCollection = new();
+            rGDialogClientCollection.RGDialogsClients = RGDialogsClients.Init();           
+            return Ok(_service.GetDialogsFromCollection(IDClients, rGDialogClientCollection));
         }
     }
 }
